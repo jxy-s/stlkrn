@@ -1,0 +1,29 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="process_callbacks.cpp" />
+    <ClCompile Include="process_map.cpp" />
+    <ClCompile Include="process_context.cpp" />
+    <ClCompile Include="thread_context.cpp" />
+    <ClCompile Include="thread_map.cpp" />
+    <ClCompile Include="thread_callbacks.cpp" />
+    <ClCompile Include="module_callbacks.cpp" />
+    <ClCompile Include="module_context.cpp" />
+    <ClCompile Include="module_map.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="process_context.hpp" />
+    <ClInclude Include="process_map.hpp" />
+    <ClInclude Include="process_callbacks.hpp" />
+    <ClInclude Include="nthelp.hpp" />
+    <ClInclude Include="ntfill.hpp" />
+    <ClInclude Include="thread_context.hpp" />
+    <ClInclude Include="thread_map.hpp" />
+    <ClInclude Include="thread_callbacks.hpp" />
+    <ClInclude Include="module_callbacks.hpp" />
+    <ClInclude Include="module_context.hpp" />
+    <ClInclude Include="module_map.hpp" />
+    <ClInclude Include="pool_tags.hpp" />
+  </ItemGroup>
+</Project>
