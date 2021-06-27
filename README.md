@@ -37,10 +37,10 @@ Exception handling enables C++ objects to unwind when an exception is thrown.
 This is a core feature of C++ which gets little attention for kernel drivers. 
 Microsoft does not natively support C++ exceptions for kernel drivers.
 
-C++ exception handling is made possible by [avakar's vcrtl libraray](github.vcrtl).
+C++ exception handling is made possible by [avakar's vcrtl libraray][github.vcrtl].
 This project would have been far more work without avakar's awesome contribution. 
 For information on exception handling in Windows Drivers head over to 
-[avakar's vcrtl github](github.vcrtl). Also, [this page](github.vcrtl.x64) 
+[avakar's vcrtl github][github.vcrtl]. Also, [this page][github.vcrtl.x64] 
 gives excellent details on exception handling on AMD64.
 
 ## MSVC C++ STL Support - `jxystl`
