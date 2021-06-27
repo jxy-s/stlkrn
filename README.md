@@ -16,7 +16,7 @@ NTSTATUS DriverEntry(
 
     try
     {
-        helloWorld.assign("Hello, World!");
+        helloWorld.assign(L"Hello, World!");
     }
     catch (const std::bad_alloc&)
     {
@@ -25,6 +25,13 @@ NTSTATUS DriverEntry(
 
     return STATUS_SUCCESS;
 }
+```
+
+```
+1: kd> dv
+   DriverObject = 0xffffca83`5380d300 Driver "\Driver\stlkrn"
+   RegistryPath = 0xffffca83`5227f000 "\REGISTRY\MACHINE\SYSTEM\ControlSet001\Services\stlkrn"
+     helloWorld = "Hello, World!"
 ```
 
 The driver implemented in this solution, `stdkrn.sys`, uses various `std` 
@@ -106,6 +113,25 @@ using vector = std::vector<T, TAllocator>;
 jxy::vector<int, PagedPool, '0GAT'> integers;
 ```
 
+```
+stlkrn!DriverEntry+0xea:
+0: kd> dx integers
+integers                 : { size=10 } [Type: std::vector<int,jxy::details::allocator<int,1,809976148> >]
+    [<Raw View>]     [Type: std::vector<int,jxy::details::allocator<int,1,809976148> >]
+    [capacity]       : 10
+    [allocator]      : {...} [Type: std::_Compressed_pair<jxy::details::allocator<int,1,809976148>,std::_Vector_val<std::_Simple_types<int> >,1>]
+    [0]              : 1 [Type: int]
+    [1]              : 2 [Type: int]
+    [2]              : 3 [Type: int]
+    [3]              : 4 [Type: int]
+    [4]              : 5 [Type: int]
+    [5]              : 6 [Type: int]
+    [6]              : 7 [Type: int]
+    [7]              : 8 [Type: int]
+    [8]              : 9 [Type: int]
+    [9]              : 10 [Type: int]
+```
+
 Below is table of functionality under the `jxy` namespace:
 
 | jxylib | STL equivalent | Notes |
@@ -157,6 +183,24 @@ Key components of `stlkrn.sys`:
 
 `std::unordered_map` would have been a better choice over the ordered tree (`std::map`) 
 for the object maps. There is a reason this isn't used (see `TODO` section).
+
+```
+stlkrn!jxy::nt::CreateProcessNotifyRoutine+0xa6:
+3: kd> dx proc
+proc                 : {...} [Type: std::shared_ptr<jxy::ProcessContext>]
+    [<Raw View>]     [Type: std::shared_ptr<jxy::ProcessContext>]
+    [ptr]            : 0xffffaa020d73cf70 [Type: jxy::ProcessContext *]
+    [control block]  : custom deleter, custom allocator [Type: std::_Ref_count_resource_alloc<jxy::ProcessContext *,jxy::details::default_delete<jxy::ProcessContext,1,1668307018>,jxy::details::allocator<jxy::ProcessContext,1,1668307018> > (derived from std::_Ref_count_base)]
+    [+0x000] m_ProcessId      : 0x2760 [Type: unsigned int]
+    [+0x004] m_SessionId      : 0x2 [Type: unsigned int]
+    [+0x008] m_ParentProcessId : 0xcc4 [Type: unsigned int]
+    [+0x010] m_FileName       : "\Device\HarddiskVolume4\Windows\System32\cmd.exe" [Type: std::basic_string<unsigned short,std::char_traits<unsigned short>,jxy::details::allocator<unsigned short,1,1852856394> >]
+    [+0x030] m_FilePart       : "cmd.exe" [Type: std::basic_string<unsigned short,std::char_traits<unsigned short>,jxy::details::allocator<unsigned short,1,1886410826> >]
+    [+0x050] m_CreatorProcessId : 0x1b08 [Type: unsigned int]
+    [+0x054] m_CreatorThreadId : 0x26a0 [Type: unsigned int]
+    [+0x058] m_Threads        [Type: jxy::ThreadMap]
+    [+0x070] m_Modules        [Type: jxy::ModuleMap]
+```
 
 ## TODO
 Although `jxy::shared_ptr` is supported through `std::shared_ptr` directly. 
