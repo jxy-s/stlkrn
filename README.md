@@ -1,2 +1,200 @@
-# stlkrn
-C++ STL in the Windows Kernel
+# C++ STL in Windows Drivers 
+This project uses MSVC C++ STL in a Windows Kernel Driver. In this solution 
+`jxystl.lib` is implemented as a kernel-tuned, pool type/tag aware, template 
+library and MSVC implementation. Which, under the hood, uses the MSVC C++ STL.
+
+```cpp
+#include <wdm.h>
+#include <jxy/string.hpp>
+
+extern "C"
+NTSTATUS DriverEntry(
+    PDRIVER_OBJECT DriverObject,
+    PUNICODE_STRING RegistryPath)
+{
+    jxy::wstring<PagedPool, '0GAT'> helloWorld;
+
+    try
+    {
+        helloWorld.assign("Hello, World!");
+    }
+    catch (const std::bad_alloc&)
+    {
+        return STATUS_INSUFFICIENT_RESOURCES;
+    }
+
+    return STATUS_SUCCESS;
+}
+```
+
+The driver implemented in this solution, `stdkrn.sys`, uses various `std` 
+namespace containers, wrapped under the `jxy` namespace. This driver registers 
+for process, thread, and image notifications; then uses modern C++ to track 
+process contexts, thread contexts, and module contexts.
+
+## Exception Handling - `vcrtl`
+Exception handling enables C++ objects to unwind when an exception is thrown.
+This is a core feature of C++ which gets little attention for kernel drivers. 
+Microsoft does not natively support C++ exceptions for kernel drivers.
+
+C++ exception handling is made possible by [avakar's vcrtl libraray](github.vcrtl).
+This project would have been far more work without avakar's awesome contribution. 
+For information on exception handling in Windows Drivers head over to 
+[avakar's vcrtl github](github.vcrtl). Also, [this page](github.vcrtl.x64) 
+gives excellent details on exception handling on AMD64.
+
+## MSVC C++ STL Support - `jxystl`
+Windows Kernel allocations are associated with a memory pool. Further, pool 
+tagging is built into the Windows Kernel. Pool tagging facilitates tracking of 
+allocations made by drivers. This tagging facility enables debugging and 
+monitoring of allocations.
+
+The `jxy` namespace, in this solution, empowers development of Windows drivers
+using the `std` namespace objects with pool typing and tagging.
+
+The library opts not to implement "global" `new`/`delete` operators. It 
+implements only `new`/`delete` operators with pool typing and tagging 
+capability. This requires specifying pool types and tags. If some functionality 
+is used that would require a "global allocator" it will not link. This is an 
+intentional design decision such that no global allocators are used, all 
+allocations must specify a pool type and tag.
+
+The `jxy` namespace implements allocators and deleters which conform to the 
+standard for use in template containers. These allocators and deleters are 
+pool type/tag aware. They require specifying the pool type and tag and prevent 
+conversions/rebinding across tool types and tags - they should be used in place 
+of the STL allocators.
+
+```cpp
+jxy::allocator<T, PagedPool, '0GAT'>;
+jxy::default_delete<T, PagedPool, '0GAT'>;
+```
+
+`jxystl.lib` implements necessary "fill" functionality for use of MSVC STL 
+containers. The implementations (in `msvcfill.cpp`) are considerate to the 
+kernel. This functionality enables the MSVC STL containers to link to 
+kernel-appropriate functionality. This also means that if some `std` container 
+functionality is used that doesn't have "fill" functionality behind  it - the 
+linker will fail. This is an intentional design decision such that any 
+implementations are thought through for use in the kernel.
+
+CRT initialization and atexit functionality is intentionally not supported. 
+Order of CRT initialization is unclear and non-obvious. When a kernel driver 
+loads global data should be clearly setup and torn down during driver load and 
+unload. Global CRT initialization "hides" this initialization in a non-obvious 
+way. Further, CRT atexit functionality is not supported. Emission of necessary 
+synchronization enabling local static initialization of C++ objects is not done 
+by the compiler.  And would introduces non-obvious synchronization in the 
+kernel. Lack of CRT initialization and atexit support is an intentional design 
+decision. I strongly recommend avoiding it when developing kernel drivers.
+
+As an example, the `jxy` namespace "wraps" `std::vector` and forces use of 
+pool types and tags:
+
+```cpp
+namespace jxy
+{
+
+template <typename T, 
+          POOL_TYPE t_PoolType, 
+          ULONG t_PoolTag, 
+          typename TAllocator = jxy::allocator<T, t_PoolType, t_PoolTag>> 
+using vector = std::vector<T, TAllocator>;
+
+}
+
+jxy::vector<int, PagedPool, '0GAT'> integers;
+```
+
+Below is table of functionality under the `jxy` namespace:
+
+| jxylib | STL equivalent | Notes |
+| ------ | -------------- | ----- |
+| `jxy::allocator` | `std::allocator` | |
+| `jxy::default_delete` | `std::default_delete` | |
+| `jxy::unique_ptr` | `std::unique_ptr` | |
+| `jxy::shared_ptr` | `std::shared_ptr` | |
+| `jxy::basic_string` | `std::basic_string` | |
+| `jxy::string` | `std::string` | |
+| `jxy::wstring` | `std::wstring` | |
+| `jxy::vector` | `std::vector` | |
+| `jxy::map` | `std::map` | |
+| `jxy::mutex` | `std::mutex` | Uses `KGUARDED_MUTEX` |
+| `jxy::shared_mutex` | `std::shared_mutex` | Uses `EX_PUSH_LOCK` |
+| `jxy::unique_lock` | `std::unique_lock` | |
+| `jxy::shared_lock` | `std::shared_lock` | |
+| `jxy::scope_resource` | None | Similar to `std::experimental::unique_resource` |
+| `jxy::scope_exit` | None | Similar to `std::experimental::scope_exit` |
+
+## Practical Usage - `stlkrn.sys` 
+The `stlkrn` project is a Windows Driver that uses `jxylib` to implement 
+process, thread, and module tracking in the Windows Kernel.
+
+`stlkrn.sys` registers for process, thread, and image notifications using 
+functionality exported by `ntoskrnl`. Using these callbacks it tracks 
+processes, threads, and image loads in various objects which use `jxy::map`, 
+`jxy::shared_mutex`, `jxy::wstring`, and more.
+
+The driver has two singletons. `jxy::ProcessMap` and `jxy::ThreadMap`, these 
+are constructed when the driver loads (`DriverEntry`) and torn down when 
+the driver unloads (`DriverUnload`). It is worth noting here each process 
+tracked in the `jxy::ProcessMap` (implemented as `jxy::ProcessContext`) also 
+manages a `jxy::ThreadMap`. Each "context" (`jxy::ProcessContext`, 
+`jxy::ThreadContext`, and `jxy::ModuleContext`) is a shared (referenced) 
+object (`jxy::shared_ptr`). Therefore, the thread context that exists in the 
+thread map singleton is the same context associated with the process context.
+
+Key components of `stlkrn.sys`:
+
+| Object | Purpose | Source | Notes |
+| ------ | ------- | ------ | ----- |
+| `jxy::ProcessContext` | Information for a process running on the system. | `process_context.hpp/cpp` | Uses `jxy::wstring`. Has thread (`jxy::ThreadMap`) and module (`jxy::ModuleMap`) map members. | 
+| `jxy::ThreadContext` | Information for a thread running on the system. | `thread_context.hpp/cpp` | Uses `std::atomic`. |
+| `jxy::ModuleContext` | Information for an image loaded in a given process. | `module_context.hpp/cpp` | Uses `jxy::wstring` and `jxy::shared_mutex`. |
+| `jxy::ProcessMap` | Singleton, maps shared `jxy::ProcessContext` objects to a PID. | `process_map.hpp/cpp` | Singleton is accessed via `jxy::GetProcessMap`. Uses `jxy::shared_mutex` and `jxy::map`. |
+| `jxy::ThreadMap` | Maps shared `jxy::ThreadContext` objects to a TID. | `thread_map.hpp/cpp` | The global thread table (singleton) is accessed via `jxy::GetThreadMap`. Each `jxy::ProcessContext` also has a thread map which is accessed through `jxy::ProcessContext::GetThreads`. Uses `jxy::shared_mutex` and `jxy::map`. |
+| `jxy::GetModuleMap` | Maps shared `jxy::ModuleContext` to a loaded image extents (base and end address). | `module_map.hpp/cpp` | Each process context has a module map member. Loaded images for a given process are tracked using this object. Uses `jxy::shared_mutex` and `jxy::map` |
+
+`std::unordered_map` would have been a better choice over the ordered tree (`std::map`) 
+for the object maps. There is a reason this isn't used (see `TODO` section).
+
+## TODO
+Although `jxy::shared_ptr` is supported through `std::shared_ptr` directly. 
+This implementation could be improved. Internally, `std::shared_ptr` will use a 
+global `new` allocation in some circumstances. To avoid this `jxy::make_shared` 
+is implemented to associate the appropriate pool tagged/typed allocator and 
+deleter. This introduces an extra control block allocation for the shared 
+reference, which is what `std::make_shared` aims to avoid. Unfortunately, 
+attaching a control block to the container is not public functionality. This 
+could be improved with some support by MSVC or by hand-rolling a 
+`jxy::shared_ptr` which is better tuned for kernel-use.
+
+I had wanted to include `std::unordered_map` initially, however it uses `ceilf`.
+Floating point arithmetic in the Windows Kernel comes with some challenges. 
+So, for now it is omitted until an appropriate solution is designed.
+
+## Disclaimer
+This solution is a passion project. At this time it is not intended for 
+production code. `x64` is well tested and stable, `stlkrn.sys` passes full 
+driver verifier options (including randomized low resource simulation). 
+Exception handling at or above dispatch has been tested, but not in practical 
+use cases. `x86` has *not* been tested.  There is functionality under the 
+`jxy` namespace that is incomplete/unused/untested.  _Your milage may vary_ - 
+I would like to continue this work over time, if any issues/bugs are found 
+feel free to open issues against this repo.
+
+## Credits
+This repository draws from some preexisting work. Credits to their authors.
+
+- [C++ Exceptions in Windows Drivers][github.vcrtl]  
+This project implements parts of the Visual Studio runtime library that are 
+needed for C++ exception handling. Currently, x86 and x64 platforms are 
+supported.
+- [Process Hacker Native API Headers][github.phnt]   
+Collection of Native API header files. Gathered from Microsoft header files and 
+symbol files, as well as a lot of reverse engineering and guessing.
+
+[//]: # (Hyperlink IDs)
+[github.vcrtl]: https://github.com/avakar/vcrtl
+[github.vcrtl.x64]: https://github.com/avakar/vcrtl/tree/master/src/x64
+[github.phnt]: https://github.com/processhacker/phnt
