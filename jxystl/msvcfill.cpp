@@ -14,6 +14,7 @@
 //
 #include <wdm.h>
 #include <stdexcept>
+#include <system_error>
 #include <intrin.h>
 
 namespace std
@@ -47,6 +48,18 @@ void __cdecl _Xoverflow_error(_In_z_ const char* What)
 void __cdecl _Xruntime_error(_In_z_ const char* What)
 {
     throw std::runtime_error(What);
+}
+
+void __cdecl _Throw_Cpp_error(int Code)
+{
+    //
+    // FIXME: This should throw a std::system_error but it comes with global
+    // allocator requirements. For now we'll throw a faked "system error" as
+    // a runtime error. 
+    // Maybe need a non-standard jxy::error_code and jxy::system_error?
+    //
+    UNREFERENCED_PARAMETER(Code);
+    throw std::runtime_error("jxy: Faked system error!");
 }
 
 }
@@ -171,4 +184,25 @@ int __cdecl __std_type_info_compare(
     // Now do the compare.
     //
     return strcmp(Lhs->_DecoratedName + 1, Rhs->_DecoratedName + 1);
+}
+
+extern "C"
+__declspec(noreturn) 
+void __cdecl terminate() throw()
+{
+    NT_ASSERT(false);
+    abort();
+}
+
+extern "C"
+__declspec(noreturn) 
+void __cdecl abort()
+{
+    NT_ASSERT(false);
+    KeBugCheckEx(
+        static_cast<ULONG>(STATUS_DRIVER_PROCESS_TERMINATED),
+        static_cast<ULONG_PTR>(0ull + reinterpret_cast<ULONG_PTR>(_ReturnAddress())),
+        static_cast<ULONG_PTR>(0ull + reinterpret_cast<ULONG_PTR>(_AddressOfReturnAddress())),
+        0, 
+        0);
 }

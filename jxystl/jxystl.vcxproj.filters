@@ -4,6 +4,7 @@
     <ClCompile Include="alloc.cpp" />
     <ClCompile Include="locks.cpp" />
     <ClCompile Include="msvcfill.cpp" />
+    <ClCompile Include="thread.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\include\jxy\alloc.hpp" />
@@ -13,5 +14,13 @@
     <ClInclude Include="..\include\jxy\string.hpp" />
     <ClInclude Include="..\include\jxy\vector.hpp" />
     <ClInclude Include="..\include\jxy\map.hpp" />
+    <ClInclude Include="..\include\jxy\thread.hpp" />
+    <ClInclude Include="..\include\jxy\list.hpp" />
+    <ClInclude Include="..\include\jxy\deque.hpp" />
+    <ClInclude Include="..\include\jxy\set.hpp" />
+    <ClInclude Include="..\include\jxy\stach.hpp" />
+    <ClInclude Include="..\include\jxy\queue.hpp" />
+    <ClInclude Include="..\include\jxy\unordered_map.hpp" />
+    <ClInclude Include="..\include\jxy\unordered_set.hpp" />
   </ItemGroup>
 </Project>
