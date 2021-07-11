@@ -10,6 +10,11 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "stlkrn", "stlkrn\stlkrn.vcx
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "jxystl", "jxystl\jxystl.vcxproj", "{D7E96B42-E040-46B7-A15C-29F0CC9DD469}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "stltest", "stltest\stltest.vcxproj", "{19BE23CA-600E-4B26-A1A9-1E4878BF9AD1}"
+	ProjectSection(ProjectDependencies) = postProject
+		{D7E96B42-E040-46B7-A15C-29F0CC9DD469} = {D7E96B42-E040-46B7-A15C-29F0CC9DD469}
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -42,6 +47,18 @@ Global
 		{D7E96B42-E040-46B7-A15C-29F0CC9DD469}.Release|x86.ActiveCfg = Release|Win32
 		{D7E96B42-E040-46B7-A15C-29F0CC9DD469}.Release|x86.Build.0 = Release|Win32
 		{D7E96B42-E040-46B7-A15C-29F0CC9DD469}.Release|x86.Deploy.0 = Release|Win32
+		{19BE23CA-600E-4B26-A1A9-1E4878BF9AD1}.Debug|x64.ActiveCfg = Debug|x64
+		{19BE23CA-600E-4B26-A1A9-1E4878BF9AD1}.Debug|x64.Build.0 = Debug|x64
+		{19BE23CA-600E-4B26-A1A9-1E4878BF9AD1}.Debug|x64.Deploy.0 = Debug|x64
+		{19BE23CA-600E-4B26-A1A9-1E4878BF9AD1}.Debug|x86.ActiveCfg = Debug|Win32
+		{19BE23CA-600E-4B26-A1A9-1E4878BF9AD1}.Debug|x86.Build.0 = Debug|Win32
+		{19BE23CA-600E-4B26-A1A9-1E4878BF9AD1}.Debug|x86.Deploy.0 = Debug|Win32
+		{19BE23CA-600E-4B26-A1A9-1E4878BF9AD1}.Release|x64.ActiveCfg = Release|x64
+		{19BE23CA-600E-4B26-A1A9-1E4878BF9AD1}.Release|x64.Build.0 = Release|x64
+		{19BE23CA-600E-4B26-A1A9-1E4878BF9AD1}.Release|x64.Deploy.0 = Release|x64
+		{19BE23CA-600E-4B26-A1A9-1E4878BF9AD1}.Release|x86.ActiveCfg = Release|Win32
+		{19BE23CA-600E-4B26-A1A9-1E4878BF9AD1}.Release|x86.Build.0 = Release|Win32
+		{19BE23CA-600E-4B26-A1A9-1E4878BF9AD1}.Release|x86.Deploy.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

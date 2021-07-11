@@ -19,13 +19,13 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{D7E96B42-E040-46B7-A15C-29F0CC9DD469}</ProjectGuid>
+    <ProjectGuid>{19BE23CA-600E-4B26-A1A9-1E4878BF9AD1}</ProjectGuid>
     <TemplateGuid>{dd38f7fc-d7bd-488b-9242-7d8754cde80d}</TemplateGuid>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <MinimumVisualStudioVersion>12.0</MinimumVisualStudioVersion>
     <Configuration>Debug</Configuration>
     <Platform Condition="'$(Platform)' == ''">Win32</Platform>
-    <RootNamespace>jxystl</RootNamespace>
+    <RootNamespace>stltest</RootNamespace>
     <WindowsTargetPlatformVersion>$(LatestTargetPlatformVersion)</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -33,7 +33,7 @@
     <TargetVersion>Windows10</TargetVersion>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>WindowsKernelModeDriver10.0</PlatformToolset>
-    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <ConfigurationType>Driver</ConfigurationType>
     <DriverType>WDM</DriverType>
     <Driver_SpectreMitigation>Spectre</Driver_SpectreMitigation>
   </PropertyGroup>
@@ -41,7 +41,7 @@
     <TargetVersion>Windows10</TargetVersion>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>WindowsKernelModeDriver10.0</PlatformToolset>
-    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <ConfigurationType>Driver</ConfigurationType>
     <DriverType>WDM</DriverType>
     <Driver_SpectreMitigation>Spectre</Driver_SpectreMitigation>
   </PropertyGroup>
@@ -49,7 +49,7 @@
     <TargetVersion>Windows10</TargetVersion>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>WindowsKernelModeDriver10.0</PlatformToolset>
-    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <ConfigurationType>Driver</ConfigurationType>
     <DriverType>WDM</DriverType>
     <Driver_SpectreMitigation>Spectre</Driver_SpectreMitigation>
   </PropertyGroup>
@@ -57,7 +57,7 @@
     <TargetVersion>Windows10</TargetVersion>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>WindowsKernelModeDriver10.0</PlatformToolset>
-    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <ConfigurationType>Driver</ConfigurationType>
     <DriverType>WDM</DriverType>
     <Driver_SpectreMitigation>Spectre</Driver_SpectreMitigation>
   </PropertyGroup>
@@ -83,73 +83,91 @@
   <PropertyGroup />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <DebuggerFlavor>DbgengKernelDebugger</DebuggerFlavor>
-    <OutDir>$(SolutionDir)build\$(Configuration).$(PlatformTarget)\lib\</OutDir>
+    <OutDir>$(SolutionDir)build\$(Configuration).$(PlatformTarget)\sys\</OutDir>
     <IntDir>$(SolutionDir)obj\$(Configuration).$(PlatformTarget)\$(ProjectName)\</IntDir>
+    <EnableInf2cat>false</EnableInf2cat>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <DebuggerFlavor>DbgengKernelDebugger</DebuggerFlavor>
-    <OutDir>$(SolutionDir)build\$(Configuration).$(PlatformTarget)\lib\</OutDir>
+    <OutDir>$(SolutionDir)build\$(Configuration).$(PlatformTarget)\sys\</OutDir>
     <IntDir>$(SolutionDir)obj\$(Configuration).$(PlatformTarget)\$(ProjectName)\</IntDir>
+    <EnableInf2cat>false</EnableInf2cat>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <DebuggerFlavor>DbgengKernelDebugger</DebuggerFlavor>
-    <OutDir>$(SolutionDir)build\$(Configuration).$(PlatformTarget)\lib\</OutDir>
+    <OutDir>$(SolutionDir)build\$(Configuration).$(PlatformTarget)\sys\</OutDir>
     <IntDir>$(SolutionDir)obj\$(Configuration).$(PlatformTarget)\$(ProjectName)\</IntDir>
+    <EnableInf2cat>false</EnableInf2cat>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <DebuggerFlavor>DbgengKernelDebugger</DebuggerFlavor>
-    <OutDir>$(SolutionDir)build\$(Configuration).$(PlatformTarget)\lib\</OutDir>
+    <OutDir>$(SolutionDir)build\$(Configuration).$(PlatformTarget)\sys\</OutDir>
     <IntDir>$(SolutionDir)obj\$(Configuration).$(PlatformTarget)\$(ProjectName)\</IntDir>
+    <EnableInf2cat>false</EnableInf2cat>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
-      <AdditionalIncludeDirectories>$(SolutionDir)include;$(VC_IncludePath);$(IntDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <LanguageStandard>stdcpp17</LanguageStandard>
+      <AdditionalIncludeDirectories>$(SolutionDir)include;$(VC_IncludePath);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
-  </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <ClCompile>
-      <AdditionalIncludeDirectories>$(SolutionDir)include;$(VC_IncludePath);$(IntDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <LanguageStandard>stdcpp17</LanguageStandard>
-    </ClCompile>
+    <Link>
+      <AdditionalDependencies>jxystl.lib;fltmgr.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)build\$(Configuration).$(PlatformTarget)\lib\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalOptions>/INTEGRITYCHECK %(AdditionalOptions)</AdditionalOptions>
+    </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>$(SolutionDir)include;$(VC_IncludePath);$(IntDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <LanguageStandard>stdcpp17</LanguageStandard>
+      <AdditionalIncludeDirectories>$(SolutionDir)include;$(VC_IncludePath);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
+    <Link>
+      <AdditionalDependencies>jxystl.lib;fltmgr.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)build\$(Configuration).$(PlatformTarget)\lib\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalOptions>/INTEGRITYCHECK %(AdditionalOptions)</AdditionalOptions>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>$(SolutionDir)include;$(VC_IncludePath);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>jxystl.lib;fltmgr.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)build\$(Configuration).$(PlatformTarget)\lib\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalOptions>/INTEGRITYCHECK %(AdditionalOptions)</AdditionalOptions>
+    </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>$(SolutionDir)include;$(VC_IncludePath);$(IntDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <LanguageStandard>stdcpp17</LanguageStandard>
+      <AdditionalIncludeDirectories>$(SolutionDir)include;$(VC_IncludePath);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
+    <Link>
+      <AdditionalDependencies>jxystl.lib;fltmgr.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)build\$(Configuration).$(PlatformTarget)\lib\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalOptions>/INTEGRITYCHECK %(AdditionalOptions)</AdditionalOptions>
+    </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
     <FilesToPackage Include="$(TargetPath)" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="alloc.cpp" />
-    <ClCompile Include="locks.cpp" />
-    <ClCompile Include="msvcfill.cpp" />
-    <ClCompile Include="thread.cpp" />
+    <ClCompile Include="deque_tests.cpp" />
+    <ClCompile Include="exception_tests.cpp" />
+    <ClCompile Include="list_tests.cpp" />
+    <ClCompile Include="locks_tests.cpp" />
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="map_tests.cpp" />
+    <ClCompile Include="memory_tests.cpp" />
+    <ClCompile Include="queue_tests.cpp" />
+    <ClCompile Include="scope_tests.cpp" />
+    <ClCompile Include="set_tests.cpp" />
+    <ClCompile Include="stack_tests.cpp" />
+    <ClCompile Include="string_tests.cpp" />
+    <ClCompile Include="tests.cpp" />
+    <ClCompile Include="thread_tests.cpp" />
+    <ClCompile Include="vector_tests.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\include\jxy\alloc.hpp" />
-    <ClInclude Include="..\include\jxy\deque.hpp" />
-    <ClInclude Include="..\include\jxy\list.hpp" />
-    <ClInclude Include="..\include\jxy\locks.hpp" />
-    <ClInclude Include="..\include\jxy\map.hpp" />
-    <ClInclude Include="..\include\jxy\memory.hpp" />
-    <ClInclude Include="..\include\jxy\queue.hpp" />
-    <ClInclude Include="..\include\jxy\scope.hpp" />
-    <ClInclude Include="..\include\jxy\set.hpp" />
-    <ClInclude Include="..\include\jxy\stack.hpp" />
-    <ClInclude Include="..\include\jxy\string.hpp" />
-    <ClInclude Include="..\include\jxy\thread.hpp" />
-    <ClInclude Include="..\include\jxy\unordered_map.hpp" />
-    <ClInclude Include="..\include\jxy\unordered_set.hpp" />
-    <ClInclude Include="..\include\jxy\vector.hpp" />
+    <ClInclude Include="tests.hpp" />
+    <ClInclude Include="tests_common.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

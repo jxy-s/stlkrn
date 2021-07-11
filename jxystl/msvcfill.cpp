@@ -12,7 +12,7 @@
 // This is done intentionally as to not introduce a path which may be unsafe
 // for the kernel.
 //
-#include <wdm.h>
+#include <fltKernel.h>
 #include <stdexcept>
 #include <system_error>
 #include <intrin.h>
@@ -56,7 +56,6 @@ void __cdecl _Throw_Cpp_error(int Code)
     // FIXME: This should throw a std::system_error but it comes with global
     // allocator requirements. For now we'll throw a faked "system error" as
     // a runtime error. 
-    // Maybe need a non-standard jxy::error_code and jxy::system_error?
     //
     UNREFERENCED_PARAMETER(Code);
     throw std::runtime_error("jxy: Faked system error!");

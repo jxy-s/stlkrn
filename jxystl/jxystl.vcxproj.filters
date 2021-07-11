@@ -18,7 +18,7 @@
     <ClInclude Include="..\include\jxy\list.hpp" />
     <ClInclude Include="..\include\jxy\deque.hpp" />
     <ClInclude Include="..\include\jxy\set.hpp" />
-    <ClInclude Include="..\include\jxy\stach.hpp" />
+    <ClInclude Include="..\include\jxy\stack.hpp" />
     <ClInclude Include="..\include\jxy\queue.hpp" />
     <ClInclude Include="..\include\jxy\unordered_map.hpp" />
     <ClInclude Include="..\include\jxy\unordered_set.hpp" />

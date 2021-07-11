@@ -3,7 +3,7 @@
 // Author:   Johnny Shaw
 //
 #pragma once
-#include <wdm.h>
+#include <fltKernel.h>
 
 //
 // Credits:

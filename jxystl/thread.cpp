@@ -7,6 +7,11 @@
 //
 #include <jxy/thread.hpp>
 
+jxy::thread::~thread()
+{
+    NT_ASSERT(m_Thread == nullptr);
+}
+
 jxy::thread::thread(thread&& Other) noexcept
     : m_Thread(std::exchange(Other.m_Thread, nullptr))
 {
@@ -53,6 +58,8 @@ void jxy::thread::join()
     {
         std::_Throw_Cpp_error(std::_NO_SUCH_PROCESS);
     }
+
+    ObDereferenceObject(m_Thread);
     m_Thread = nullptr;
 }
 
@@ -63,6 +70,7 @@ void jxy::thread::detach()
         std::_Throw_Cpp_error(std::_INVALID_ARGUMENT);
     }
 
+    ObDereferenceObject(m_Thread);
     m_Thread = nullptr;
 }
 

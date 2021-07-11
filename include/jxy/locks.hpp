@@ -27,6 +27,8 @@ class shared_mutex
 {
 public:
 
+    using native_handle_type = PEX_PUSH_LOCK;
+
     shared_mutex() noexcept;
     ~shared_mutex() noexcept;
     void lock() noexcept;
@@ -35,6 +37,7 @@ public:
     void lock_shared() noexcept;
     bool try_lock_shared() noexcept;
     void unlock_shared() noexcept;
+    native_handle_type native_handle() noexcept;
 
 private:
 
@@ -47,11 +50,14 @@ class mutex
 {
 public:
 
+    using native_handle_type = PKGUARDED_MUTEX;
+
     mutex() noexcept(false)
     {
-        m_GuardedMutex = ExAllocatePoolWithTag(NonPagedPoolNx,
-                                               sizeof(*m_GuardedMutex),
-                                               t_PoolTag);
+        m_GuardedMutex = static_cast<PKGUARDED_MUTEX>(
+            ExAllocatePoolWithTag(NonPagedPoolNx,
+                                  sizeof(*m_GuardedMutex),
+                                  t_PoolTag));
         if (!m_GuardedMutex)
         {
             throw std::bad_alloc();
@@ -81,6 +87,11 @@ public:
     void unlock() noexcept
     {
         KeReleaseGuardedMutex(m_GuardedMutex);
+    }
+
+    native_handle_type native_handle() noexcept
+    {
+        return m_GuardedMutex;
     }
 
 private:

@@ -9,7 +9,7 @@
 // the pool type and tags for all allocations.
 //
 #pragma once
-#include <wdm.h>
+#include <fltKernel.h>
 #include <cstddef>
 
 void* __cdecl operator new(size_t Size, POOL_TYPE PoolType, ULONG PoolTag) noexcept(false);

@@ -28,11 +28,15 @@ public:
     using this_type = scope_resource<T, TReleaseFunctor>;
     using value_type = T;
 
-    scope_resource() = default;
-
     ~scope_resource() noexcept
     {
         TReleaseFunctor()(m_Resource);
+    }
+
+    scope_resource() = default;
+
+    scope_resource(T Resource) : m_Resource(Resource)
+    {
     }
 
     value_type get() const noexcept

@@ -6,7 +6,7 @@
 // Abstract: Helpful functionality for bridging NT and modern C++  
 //
 #pragma once
-#include <wdm.h>
+#include <fltKernel.h>
 #include <jxy/string.hpp>
 #include <jxy/scope.hpp>
 

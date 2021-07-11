@@ -134,23 +134,36 @@ integers                 : { size=10 } [Type: std::vector<int,jxy::details::allo
 
 Below is table of functionality under the `jxy` namespace:
 
-| jxylib | STL equivalent | Notes |
-| ------ | -------------- | ----- |
-| `jxy::allocator` | `std::allocator` | |
-| `jxy::default_delete` | `std::default_delete` | |
-| `jxy::unique_ptr` | `std::unique_ptr` | |
-| `jxy::shared_ptr` | `std::shared_ptr` | |
-| `jxy::basic_string` | `std::basic_string` | |
-| `jxy::string` | `std::string` | |
-| `jxy::wstring` | `std::wstring` | |
-| `jxy::vector` | `std::vector` | |
-| `jxy::map` | `std::map` | |
-| `jxy::mutex` | `std::mutex` | Uses `KGUARDED_MUTEX` |
-| `jxy::shared_mutex` | `std::shared_mutex` | Uses `EX_PUSH_LOCK` |
-| `jxy::unique_lock` | `std::unique_lock` | |
-| `jxy::shared_lock` | `std::shared_lock` | |
-| `jxy::scope_resource` | None | Similar to `std::experimental::unique_resource` |
-| `jxy::scope_exit` | None | Similar to `std::experimental::scope_exit` |
+| jxylib | STL equivalent | Include | Notes |
+| ------ | -------------- | ------- | ----- |
+| `jxy::allocator` | `std::allocator` | `<jxy/memory.hpp>` | |
+| `jxy::default_delete` | `std::default_delete` | `<jxy/memory.hpp>` | |
+| `jxy::unique_ptr` | `std::unique_ptr` | `<jxy/memory.hpp>` | |
+| `jxy::shared_ptr` | `std::shared_ptr` | `<jxy/memory.hpp>` | |
+| `jxy::basic_string` | `std::basic_string` | `<jxy/string.hpp>`| |
+| `jxy::string` | `std::string` | `<jxy/string.hpp>` | |
+| `jxy::wstring` | `std::wstring` | `<jxy/string.hpp>` | |
+| `jxy::vector` | `std::vector` | `<jxy/vector.hpp>` | |
+| `jxy::map` | `std::map` | `<jxy/map.hpp>` | |
+| `jxy::multimap` | `std::miltimap` | `<jxy/map.hpp>` | |
+| `jxy::mutex` | `std::mutex` | `<jxy/locks.hpp>` | Uses `KGUARDED_MUTEX` |
+| `jxy::shared_mutex` | `std::shared_mutex` | `<jxy/locks.hpp>` | Uses `EX_PUSH_LOCK` |
+| `jxy::unique_lock` | `std::unique_lock` | `<jxy/locks.hpp>` | |
+| `jxy::shared_lock` | `std::shared_lock` | `<jxy/locks.hpp>` | |
+| `jxy::scope_resource` | None | `<jxy/scope.hpp>` | Similar to `std::experimental::unique_resource` |
+| `jxy::scope_exit` | None | `<jxy/scope.hpp>` | Similar to `std::experimental::scope_exit` |
+| `jxy::thread` | `std::thread` | `<jxy/thread.hpp>` | |
+| `jxy::deque` | `std::deque` | `<jxy/deque.hpp>` | |
+| `jxy::queue` | `std:queue` | `<jxy/queue.hpp>` | |
+| `jxy::priority_queue` | `std::priority_queue` | `<jxy/queue.hpp>` | |
+| `jxy::set` | `std::set` | `<jxy/set.hpp>` | |
+| `jxy::multiset` | `std::multiset` | `<jxy/set.hpp>` | |
+| `jxy::stack` | `std::stack` | `<jxy/stack.hpp>` | |
+
+## Tests - `stltest.sys`
+
+The `stltest` project implements a driver that runs some tests against jxystl, 
+usage of STL, and exceptions in the Windows Kernel.
 
 ## Practical Usage - `stlkrn.sys` 
 The `stlkrn` project is a Windows Driver that uses `jxylib` to implement 
@@ -227,6 +240,75 @@ use cases. `x86` has *not* been tested.  There is functionality under the
 I would like to continue this work over time, if any issues/bugs are found 
 feel free to open issues against this repo.
 
+## Related Work
+
+This project provides STL support in the Windows Kernel by using as much of the 
+STL facility as possible. There are other solutions for use of STL in kernel 
+development. This section will outline alternatives, first I will summarize 
+this work:
+
+This Project:
+ - Uses the STL directly. Does **not** reimplement any STL functionality unless absolutely necessary.
+ - Requires pool types and tags. No global `new` or `delete` is implemented.
+ - Forbid moving data between objects of different pools or tags.
+ - Avoids CRT initialization and `atexit` functionality. CRT initialization order 
+   is non-obvious, driver initialization and teardown *should be obvious*. `atexit` functionality 
+   may introduce data races for kernel code, `atexit` is not implemented.
+
+[Bareflank Hypervisor][github.bareflank]:
+
+Bareflank implements support for running C++ in their hypervisor. They have full STL and CRT 
+support. This is a comprehensive project that enables a plethora features of the standard in 
+kernel mode (including exceptions). As I understand their solution forces `NonPagedPool` on global 
+`new`/`delete` allocations. I have to commend Bareflank with their implementation, it's well 
+thought out and cross platform. However the Windows implementation builds through cygwin and 
+"shims" in support for the Windows kernel. In comparison, this project aims to be considerate to 
+the Windows kernel. It enables specifying pool tags and types (paged vs non-paged) and hopes 
+to minimize "sharp edges" associated with using C++ and the STL in kernel mode. All that said, 
+Bareflank is impressive for what is does. For an excellent presentation on Bareflank's support of 
+C++ I highly recommend watching [Dr. Rian Quinn's presentation at cppcon 2016][channel9.bareflank].
+
+[Win32KernelSTL][github.Win32KernelSTL]:
+
+The Win32KernelSTL project does allow you to use STL functionality directly in the kernel. The project 
+implements global `new`/`delete` and forces `NonPagedPool`, it implements CRT initialization support, 
+and bugchecks when a cpp exception is thrown. It makes no attempt to do cpp exception unwinding. Due 
+to the assumptions it makes I find it unpractical for any serious use cases. The code is reasonably 
+clear and documented, I recommend giving this project a browse for educating around C++ support in the 
+kernel. One note, the CRT code in Win32KernelSTL does implement `atexit` but keep in mind there is no 
+synchronization emitted by the compiler here (as opposed to user mode). So a local static requiring 
+insertion of an entry in the `atexit` list may race causing a double-init or double-free.
+
+[Driver Plus Plus][github.dxx]:
+
+This project implements necessary C++ facility for pulling in a number of C++ solutions into 
+kernel mode (`EASTL`, `msgpack`, etc.). Driver Plus Plus implements CRT initialization and global 
+`new`/`delete` support (which forces `NonPagedPool`). Again this is counter to the goals of this 
+project. However, this project does enable a lot of great C++ facility for use in kernel mode. It 
+does make modifications to the C++ solutions it pulls in to shim in support for it's use cases. 
+Driver Plus Plus also makes the assumption around `atexit` as mentioned previously.
+
+[KTL][github.ktl]:
+
+KTL (Windows Kernel Template Library) reimplements a good amount of modern C++ functionality for 
+use in the Windows Kernel. It also implements global `new`/`delete` but does a decent job 
+at providing facility for specifying pool tags and types where possible. However this does mean 
+the global allocator might hide an allocation in a non-obvious pool. Further the template 
+allocators in this project carry the cost of two points for an allocator and deallocator object, 
+I am also concerned that conversion between the allocator types may allow for cross pool/tag 
+allocs/frees. Overall I'm impressed by the amount of facility that is implemented here. 
+Reimplementation of STL functionality and the global allocators are counter to the ideologies of 
+this project.
+
+[Kernel-Bridge][github.KernelBridge]:
+
+Kernel-Bridge implements some great facility for Windows Kernel development. The library provides 
+wrappers for registering for Windows callbacks using C++ objects. I would like to find more time 
+to use and investigate this solution. It does implement CRT support. The `atexit` functionality 
+implemented is not dynamic - it uses a static array, if it runs out of slots, it fails. The 
+default `new`/`delete` forces `NonPagedPool`. It does not have full exception support, it will 
+bugcheck if a cpp exception is thrown - it will not unwind objects on the stack.
+
 ## Credits
 This repository draws from some preexisting work. Credits to their authors.
 
@@ -242,3 +324,9 @@ symbol files, as well as a lot of reverse engineering and guessing.
 [github.vcrtl]: https://github.com/avakar/vcrtl
 [github.vcrtl.x64]: https://github.com/avakar/vcrtl/tree/master/src/x64
 [github.phnt]: https://github.com/processhacker/phnt
+[github.bareflank]: https://github.com/Bareflank/hypervisor
+[channel9.bareflank]: https://channel9.msdn.com/Events/CPP/CppCon-2016/CppCon-2016-Rian-Quinn-Making-C-and-the-STL-Work-in-the-Linux--Windows-Kernels
+[github.Win32KernelSTL]: https://github.com/DragonQuestHero/Win32KernelSTL
+[github.dxx]: https://github.com/sidyhe/dxx
+[github.ktl]: https://github.com/MeeSong/KTL
+[github.KernelBridge]: https://github.com/HoShiMin/Kernel-Bridge

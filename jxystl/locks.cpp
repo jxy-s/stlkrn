@@ -48,3 +48,8 @@ void jxy::shared_mutex::unlock_shared() noexcept
 {
     FltReleasePushLockEx(&m_PushLock, 0);
 }
+
+jxy::shared_mutex::native_handle_type jxy::shared_mutex::native_handle() noexcept
+{
+    return &m_PushLock;
+}

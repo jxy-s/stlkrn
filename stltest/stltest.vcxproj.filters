@@ -1,0 +1,24 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="exception_tests.cpp" />
+    <ClCompile Include="locks_tests.cpp" />
+    <ClCompile Include="map_tests.cpp" />
+    <ClCompile Include="memory_tests.cpp" />
+    <ClCompile Include="scope_tests.cpp" />
+    <ClCompile Include="string_tests.cpp" />
+    <ClCompile Include="tests.cpp" />
+    <ClCompile Include="thread_tests.cpp" />
+    <ClCompile Include="vector_tests.cpp" />
+    <ClCompile Include="queue_tests.cpp" />
+    <ClCompile Include="deque_tests.cpp" />
+    <ClCompile Include="list_tests.cpp" />
+    <ClCompile Include="stack_tests.cpp" />
+    <ClCompile Include="set_tests.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="tests.hpp" />
+    <ClInclude Include="tests_common.hpp" />
+  </ItemGroup>
+</Project>

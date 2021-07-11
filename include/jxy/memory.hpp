@@ -20,7 +20,7 @@
 // jxy::shared_ptr      std::shared_ptr
 //
 #pragma once
-#include <wdm.h>
+#include <fltKernel.h>
 #include <jxy/alloc.hpp>
 #include <memory>
 

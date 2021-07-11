@@ -6,7 +6,7 @@
 // Abstract: Common location for pool tag and pool type definitions. 
 //
 #pragma once
-#include <wdm.h>
+#include <fltKernel.h>
 
 namespace jxy
 {

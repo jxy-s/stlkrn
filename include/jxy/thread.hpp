@@ -10,7 +10,7 @@
 // jxy::thread          std::thread
 //
 #pragma once
-#include <ntddk.h>
+#include <fltKernel.h>
 #include <thread>
 #include <jxy/memory.hpp>
 
@@ -37,6 +37,8 @@ public:
 
     static constexpr POOL_TYPE pool_type = PagedPool;
     static constexpr ULONG pool_tag = 'TYXJ';
+
+    ~thread();
 
     thread() noexcept = default;
 
@@ -94,7 +96,7 @@ private:
         std::invoke(std::move(std::get<t_Indices>(tuple))...);
         
         //
-        // Check that no matter what the invoked routine does that it returned
+        // Check that no matter what the invoked routine does it returns
         // to passive.
         //
         NT_ASSERT(KeGetCurrentIrql() == PASSIVE_LEVEL);
@@ -134,13 +136,19 @@ private:
         }
         else
         {
-            NT_VERIFY(ObReferenceObjectByHandle(threadHandle,
-                                                THREAD_ALL_ACCESS,
-                                                *PsThreadType,
-                                                KernelMode,
-                                                reinterpret_cast<void**>(&m_Thread),
-                                                nullptr));
-            NT_VERIFY(ObCloseHandle(threadHandle, KernelMode));
+            NT_VERIFY(NT_SUCCESS(
+                ObReferenceObjectByHandle(threadHandle,
+                                          THREAD_ALL_ACCESS,
+                                          *PsThreadType,
+                                          KernelMode,
+                                          reinterpret_cast<void**>(&m_Thread),
+                                          nullptr)));
+            NT_VERIFY(NT_SUCCESS(ObCloseHandle(threadHandle, KernelMode)));
+
+            //
+            // Release the memory to the invoke routine.
+            //
+            params.release();
         }
     }
 
