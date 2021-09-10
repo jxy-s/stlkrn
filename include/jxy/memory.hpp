@@ -89,6 +89,12 @@ public:
         return memory;
     }
 
+    template <typename Other>
+    struct rebind
+    {
+        using other = allocator<Other, t_PoolType, t_PoolTag>;
+    };
+
 #if _HAS_DEPRECATED_ALLOCATOR_MEMBERS
     _CXX17_DEPRECATE_OLD_ALLOCATOR_MEMBERS typedef T* pointer;
     _CXX17_DEPRECATE_OLD_ALLOCATOR_MEMBERS typedef const T* const_pointer;
@@ -97,12 +103,6 @@ public:
     _CXX17_DEPRECATE_OLD_ALLOCATOR_MEMBERS typedef const T& const_reference;
 
     using is_always_equal _CXX17_DEPRECATE_OLD_ALLOCATOR_MEMBERS = std::true_type;
-
-    template <typename Other>
-    struct _CXX17_DEPRECATE_OLD_ALLOCATOR_MEMBERS rebind 
-    {
-        using other = allocator<Other, t_PoolType, t_PoolTag>;
-    };
 
     _CXX17_DEPRECATE_OLD_ALLOCATOR_MEMBERS 
     _NODISCARD 
