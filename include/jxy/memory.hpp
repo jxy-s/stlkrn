@@ -89,6 +89,24 @@ public:
         return memory;
     }
 
+    //
+    // jxy::allocator implements rebind despite it being deprecated (cpp17) and
+    // removed (cpp20) on std::allocator.
+    // Without this, std::_Replace_first_parameter<_Other,_Ty> trips up on replacing
+    // the type at rebind_alloc on allocator_traits.
+    //
+    // Per the allocator concepts - implementation of rebind is optional and seemingly
+    // required for us to avoid the template parameter replacement on the custom
+    // allocator:
+    // https://en.cppreference.com/w/cpp/named_req/Allocator#cite_note-2
+    //
+
+    template <typename Other>
+    struct rebind
+    {
+        using other = allocator<Other, t_PoolType, t_PoolTag>;
+    };
+
 #if _HAS_DEPRECATED_ALLOCATOR_MEMBERS
     _CXX17_DEPRECATE_OLD_ALLOCATOR_MEMBERS typedef T* pointer;
     _CXX17_DEPRECATE_OLD_ALLOCATOR_MEMBERS typedef const T* const_pointer;
@@ -97,12 +115,6 @@ public:
     _CXX17_DEPRECATE_OLD_ALLOCATOR_MEMBERS typedef const T& const_reference;
 
     using is_always_equal _CXX17_DEPRECATE_OLD_ALLOCATOR_MEMBERS = std::true_type;
-
-    template <typename Other>
-    struct _CXX17_DEPRECATE_OLD_ALLOCATOR_MEMBERS rebind 
-    {
-        using other = allocator<Other, t_PoolType, t_PoolTag>;
-    };
 
     _CXX17_DEPRECATE_OLD_ALLOCATOR_MEMBERS 
     _NODISCARD 
