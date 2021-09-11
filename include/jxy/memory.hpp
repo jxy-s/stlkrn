@@ -89,6 +89,18 @@ public:
         return memory;
     }
 
+    //
+    // jxy::allocator implements rebind despite it being deprecated (cpp17) and
+    // removed (cpp20) on std::allocator.
+    // Without this, std::_Replace_first_parameter<_Other,_Ty> trips up on replacing
+    // the type at rebind_alloc on allocator_traits.
+    //
+    // Per the allocator concepts - implementation of rebind is optional and seemingly
+    // required for us to avoid the template parameter replacement on the custom
+    // allocator:
+    // https://en.cppreference.com/w/cpp/named_req/Allocator#cite_note-2
+    //
+
     template <typename Other>
     struct rebind
     {
