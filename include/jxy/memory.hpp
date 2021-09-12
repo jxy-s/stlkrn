@@ -224,26 +224,25 @@ unique_ptr<T, t_PoolType, t_PoolTag> make_unique(TArgs&&... Args) noexcept(false
     return unique_ptr<T, t_PoolType, t_PoolTag>(new(t_PoolType, t_PoolTag)T(std::forward<TArgs>(Args)...));
 }
 
-//
-// For shared_ptr, here, I might roll a more allocation-friendly solution
-// later. shared_ptr will internally use the default `new` allocator, which
-// is something I prefer to avoid, in order to force pool and tag
-// specifications. Having a global allocator for kernel code is "meh". So I
-// might replace this with something a bit more kernel friendly. For now, this
-// is okay, and I'll hack-in my own make_shared which will help enforce use of
-// being pool/tag considerate.
-//
-
 template <typename T, POOL_TYPE t_PoolType, ULONG t_PoolTag>
 using shared_ptr = std::shared_ptr<T>;
 
 template <typename T, POOL_TYPE t_PoolType, ULONG t_PoolTag, typename... TArgs>
 shared_ptr<T, t_PoolType, t_PoolTag> make_shared(TArgs&&... Args) noexcept(false)
 {
-    return std::shared_ptr<T>(
-        new(t_PoolType, t_PoolTag) T(std::forward<TArgs>(Args)...),
-        jxy::default_delete<T, t_PoolType, t_PoolTag>(),
-        jxy::allocator<T, t_PoolType, t_PoolTag>());
+    //
+    // Rather than use make_shared here, we'll force allocate_shared.
+    // This is because there is no way to specify an allocator on make_shared 
+    // thus internally it will use the global new allocator, since jxystl aims
+    // to force tagging and typing of all allocations we avoid that at all
+    // costs.
+    // 
+    // allocate_shared enables us to specify jxy::allocator with our pool
+    // parameters and eliminates this problem.
+    //
+
+    using allocator = jxy::allocator<T, t_PoolType, t_PoolTag>;
+    return std::allocate_shared<T, allocator>(allocator(), std::forward<TArgs>(Args)...);
 }
 
 }
