@@ -34,9 +34,23 @@ NTSTATUS DriverEntry(
      helloWorld = "Hello, World!"
 ```
 
-The driver implemented in this solution, `stdkrn.sys`, uses various `std` 
-namespace containers, wrapped under the `jxy` namespace. This driver registers 
-for process, thread, and image notifications; then uses modern C++ to track 
+## Supported Standards
+
+| Standard | Supported | Notes |
+| :------: | :-------: | ----- |
+| cpp11    | No        | untested, your milage my vary |
+| cpp14    | **Yes**   |       |
+| cpp17    | **Yes**   |       |
+| cpp20    | **Yes**   |       |
+
+The test driver in this solution, `stdtest.sys`, houses the unit tests for the 
+project. Unit tests are run in the kernel with driver verifier. The unit test 
+framework is bare bones but is sufficient for exercising `jxystl.lib`.
+
+Another driver implemented in this solution, `stdkrn.sys`, puts `jxystl.lib` 
+to use in a practical scenario. It uses various `std` namespace facilities and 
+containers (wrapped under the `jxy` namespace). This driver registers for 
+process, thread, and image notifications; then uses modern C++ to track 
 process contexts, thread contexts, and module contexts.
 
 ## Exception Handling - `vcrtl`
@@ -134,7 +148,7 @@ integers                 : { size=10 } [Type: std::vector<int,jxy::details::allo
 
 Below is table of functionality under the `jxy` namespace:
 
-| jxylib | STL equivalent | Include | Notes |
+| jxy | STL equivalent | Include | Notes |
 | ------ | -------------- | ------- | ----- |
 | `jxy::allocator` | `std::allocator` | `<jxy/memory.hpp>` | |
 | `jxy::default_delete` | `std::default_delete` | `<jxy/memory.hpp>` | |
@@ -166,7 +180,7 @@ The `stltest` project implements a driver that runs some tests against jxystl,
 usage of STL, and exceptions in the Windows Kernel.
 
 ## Practical Usage - `stlkrn.sys` 
-The `stlkrn` project is a Windows Driver that uses `jxylib` to implement 
+The `stlkrn` project is a Windows Driver that uses `jxystl.lib` to implement 
 process, thread, and module tracking in the Windows Kernel.
 
 `stlkrn.sys` registers for process, thread, and image notifications using 
