@@ -216,16 +216,6 @@ proc                 : {...} [Type: std::shared_ptr<jxy::ProcessContext>]
 ```
 
 ## TODO
-Although `jxy::shared_ptr` is supported through `std::shared_ptr` directly. 
-This implementation could be improved. Internally, `std::shared_ptr` will use a 
-global `new` allocation in some circumstances. To avoid this `jxy::make_shared` 
-is implemented to associate the appropriate pool tagged/typed allocator and 
-deleter. This introduces an extra control block allocation for the shared 
-reference, which is what `std::make_shared` aims to avoid. Unfortunately, 
-attaching a control block to the container is not public functionality. This 
-could be improved with some support by MSVC or by hand-rolling a 
-`jxy::shared_ptr` which is better tuned for kernel-use.
-
 I had wanted to include `std::unordered_map` initially, however it uses `ceilf`.
 Floating point arithmetic in the Windows Kernel comes with some challenges. 
 So, for now it is omitted until an appropriate solution is designed.
