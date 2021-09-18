@@ -49,6 +49,11 @@ void jxy::DeleteProcessMap()
     g_ProcessMap = nullptr;
 }
 
+jxy::ProcessMap::ProcessMap()
+{
+    m_Map.max_load_factor(MapMaxLoadFactor);
+}
+
 NTSTATUS jxy::ProcessMap::Populate() try 
 {
     //

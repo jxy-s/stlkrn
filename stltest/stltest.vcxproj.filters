@@ -16,6 +16,8 @@
     <ClCompile Include="list_tests.cpp" />
     <ClCompile Include="stack_tests.cpp" />
     <ClCompile Include="set_tests.cpp" />
+    <ClCompile Include="unordered_map_tests.cpp" />
+    <ClCompile Include="unordered_set_tests.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="tests.hpp" />
