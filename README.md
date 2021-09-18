@@ -292,12 +292,31 @@ project. However, this project does enable a lot of great C++ facility for use i
 does make modifications to the C++ solutions it pulls in to shim in support for it's use cases. 
 Driver Plus Plus also makes the assumption around `atexit` as mentioned previously.
 
-[KTL][github.ktl]:
+[KTL - DymOK93][github.ktl.DymOK93]
 
-KTL (Windows Kernel Template Library) reimplements a good amount of modern C++ functionality for 
-use in the Windows Kernel. It also implements global `new`/`delete` but does a decent job 
-at providing facility for specifying pool tags and types where possible. However this does mean 
-the global allocator might hide an allocation in a non-obvious pool. Further the template 
+KTL (Windows Kernel Template Library by DymOK93) reimplements a good amount of modern C++ and is
+actively developing more support for use in the Windows Kernel. It also has support for RAII around 
+many kernel primitives, provides native `ANSI_STRING` and `UNICODE_STRING` support, it provides 
+some useful wrappers for registering kernel callbacks, and more convenience features around the 
+Windows Kernel. It implements global `new`/`delete` and has a preprocessor definition 
+(`KTL_USING_NON_PAGED_NEW_AS_DEFAULT`) for switching between default paged or non-paged, which is 
+good. However, it uses a single pool tag (`KTL_HEAP_TAG`). Further, the existing allocator templates 
+don't enable a developer to specify a pool tag, so using this library as-is causes all allocations 
+to be tagged with the same pool tag. That said, it would be reasonable to implement a custom 
+allocator that empowers tagging of allocations. The library does have exception support, albeit 
+only x64. The exception support in KTL is based on [avakar's][github.vcrtl] with enhancements and 
+fixes. I commend the work here and I'm impressed by the amount of facility that exists, it is 
+reasonably feature packed and under active development. I would like to explore using it more in 
+the future, and potentially collaborating on better exception support for both `stlkrn` and `KTL`. 
+Reimplementation of STL functionality, lack of native pool tagging support, and the global 
+allocators are counter to the ideologies of this project.
+
+[KTL - MeeSong][github.ktl.MeeSong]:
+
+KTL (Windows Kernel Template Library by MeeSong) reimplements a good amount of modern C++ 
+functionality for use in the Windows Kernel. It also implements global `new`/`delete` but does a 
+decent job at providing facility for specifying pool tags and types where possible. However this 
+does mean the global allocator might hide an allocation in a non-obvious pool. Further the template 
 allocators in this project carry the cost of two points for an allocator and deallocator object, 
 I am also concerned that conversion between the allocator types may allow for cross pool/tag 
 allocs/frees. Overall I'm impressed by the amount of facility that is implemented here. 
@@ -332,5 +351,6 @@ symbol files, as well as a lot of reverse engineering and guessing.
 [channel9.bareflank]: https://channel9.msdn.com/Events/CPP/CppCon-2016/CppCon-2016-Rian-Quinn-Making-C-and-the-STL-Work-in-the-Linux--Windows-Kernels
 [github.Win32KernelSTL]: https://github.com/DragonQuestHero/Win32KernelSTL
 [github.dxx]: https://github.com/sidyhe/dxx
-[github.ktl]: https://github.com/MeeSong/KTL
+[github.ktl.DymOK93]: https://github.com/DymOK93/KTL
+[github.ktl.MeeSong]: https://github.com/MeeSong/KTL
 [github.KernelBridge]: https://github.com/HoShiMin/Kernel-Bridge
