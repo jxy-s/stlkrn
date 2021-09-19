@@ -173,6 +173,10 @@ Below is table of functionality under the `jxy` namespace:
 | `jxy::set` | `std::set` | `<jxy/set.hpp>` | |
 | `jxy::multiset` | `std::multiset` | `<jxy/set.hpp>` | |
 | `jxy::stack` | `std::stack` | `<jxy/stack.hpp>` | |
+| `jxy::unordered_map` | `std::unordered_map` | `<jxy/unordered_map.hpp>` | |
+| `jxy::unordered_multimap` | `std::unordered_multimap` | `<jxy/unordered_map.hpp>` | |
+| `jxy::unordered_set` | `std::unordered_set` | `<jxy/unordered_set.hpp>` | |
+| `jxy::unordered_multiset` | `std::unordered_multiset` | `<jxy/unordered_set.hpp>` | |
 
 ## Tests - `stltest.sys`
 
@@ -208,9 +212,6 @@ Key components of `stlkrn.sys`:
 | `jxy::ThreadMap` | Maps shared `jxy::ThreadContext` objects to a TID. | `thread_map.hpp/cpp` | The global thread table (singleton) is accessed via `jxy::GetThreadMap`. Each `jxy::ProcessContext` also has a thread map which is accessed through `jxy::ProcessContext::GetThreads`. Uses `jxy::shared_mutex` and `jxy::map`. |
 | `jxy::GetModuleMap` | Maps shared `jxy::ModuleContext` to a loaded image extents (base and end address). | `module_map.hpp/cpp` | Each process context has a module map member. Loaded images for a given process are tracked using this object. Uses `jxy::shared_mutex` and `jxy::map` |
 
-`std::unordered_map` would have been a better choice over the ordered tree (`std::map`) 
-for the object maps. There is a reason this isn't used (see `TODO` section).
-
 ```
 stlkrn!jxy::nt::CreateProcessNotifyRoutine+0xa6:
 3: kd> dx proc
@@ -229,10 +230,18 @@ proc                 : {...} [Type: std::shared_ptr<jxy::ProcessContext>]
     [+0x070] m_Modules        [Type: jxy::ModuleMap]
 ```
 
-## TODO
-I had wanted to include `std::unordered_map` initially, however it uses `ceilf`.
-Floating point arithmetic in the Windows Kernel comes with some challenges. 
-So, for now it is omitted until an appropriate solution is designed.
+## A note on `xhash` and `_XHASH_NO_FLOATING_POINT`
+In order to support `unordered_map`, `unordered_set`, and the multi variants 
+`jxystl.lib` copies `xhash` from the MSVC STL and implements an alternative
+bucket calculation algorithm. The STL implementation uses floating point
+arithmetic, supporting this in the kernel is non-trivial and ill advised. To 
+avoid floating point arithmetic `jxystl` patches `xhash` with a conditionally
+compiled `_XHASH_NO_FLOATING_POINT`. I expect the `jxystl` implementation here
+to be faster than the STL's since it completely avoids floating point arithmetic,
+however I have not yet had time run good experiments on this hypothesis.
+
+In the future, I would like to submit a pull request to the MSVC STL to affect
+this change natively in the MSVC `xhash` implementation.
 
 ## Disclaimer
 This solution is a passion project. At this time it is not intended for 

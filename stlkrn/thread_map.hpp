@@ -17,7 +17,7 @@
 //
 #pragma once
 #include <fltKernel.h>
-#include <jxy/map.hpp>
+#include <jxy/unordered_map.hpp>
 #include <jxy/vector.hpp>
 #include <jxy/locks.hpp>
 #include "pool_tags.hpp"
@@ -36,14 +36,15 @@ public:
     using ThreadContextType = jxy::shared_ptr<ThreadContext, 
                                               PoolTypes::ThreadContext,
                                               PoolTags::ThreadContext>;
-    using MapType = jxy::map<ThreadIdType, 
-                             ThreadContextType, 
-                             PagedPool, 
-                             PoolTags::ThreadMap>;
+    static constexpr uint64_t MapMaxLoadFactor = 11;
+    using MapType = jxy::unordered_map<ThreadIdType,
+                                       ThreadContextType,
+                                       PagedPool,
+                                       PoolTags::ThreadMap>;
 
     ~ThreadMap() noexcept = default;
 
-    ThreadMap() = default;
+    ThreadMap();
 
     ThreadContextType TrackThread(ThreadContextType ThreadContext) noexcept(false);
 

@@ -23,6 +23,8 @@ extern void QueueTests();
 extern void ListTests();
 extern void StackTests();
 extern void SetTests();
+extern void UnorderedMapTests();
+extern void UnorderedSetTests();
 
 bool RunTests() try
 {
@@ -39,6 +41,8 @@ bool RunTests() try
     ListTests();
     StackTests();
     SetTests();
+    UnorderedMapTests();
+    UnorderedSetTests();
 
     return true;
 }

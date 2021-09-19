@@ -1,7 +1,7 @@
 //
 // Copyright (c) Johnny Shaw. All rights reserved.
 // 
-// File:     stltest/exception_tests.cpp
+// File:     stltest/stack_tests.cpp
 // Author:   Johnny Shaw
 //
 #include "tests_common.hpp"

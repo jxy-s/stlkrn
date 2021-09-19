@@ -47,6 +47,11 @@ void jxy::DeleteThreadMap()
     thrdMap.reset(g_ThreadMap);
 }
 
+jxy::ThreadMap::ThreadMap()
+{
+    m_Map.max_load_factor(MapMaxLoadFactor);
+}
+
 jxy::ThreadMap::ThreadContextType 
 jxy::ThreadMap::TrackThread(ThreadContextType ThreadContext) noexcept(false)
 {

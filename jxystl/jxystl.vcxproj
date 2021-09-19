@@ -150,6 +150,7 @@
     <ClInclude Include="..\include\jxy\unordered_map.hpp" />
     <ClInclude Include="..\include\jxy\unordered_set.hpp" />
     <ClInclude Include="..\include\jxy\vector.hpp" />
+    <ClInclude Include="..\include\jxy\xhash" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
