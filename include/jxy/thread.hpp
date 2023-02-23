@@ -91,9 +91,11 @@ private:
         //
         NT_ASSERT(KeGetCurrentIrql() == PASSIVE_LEVEL);
 
-        const jxy::unique_ptr<TTuple, pool_type, pool_tag> funcVals(static_cast<TTuple*>(StartContext));
-        TTuple& tuple = *funcVals;
-        std::invoke(std::move(std::get<t_Indices>(tuple))...);
+        {
+            const jxy::unique_ptr<TTuple, pool_type, pool_tag> funcVals(static_cast<TTuple*>(StartContext));
+            TTuple& tuple = *funcVals;
+            std::invoke(std::move(std::get<t_Indices>(tuple))...);
+        }
         
         //
         // Check that no matter what the invoked routine does it returns
