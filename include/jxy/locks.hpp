@@ -54,10 +54,13 @@ public:
 
     mutex() noexcept(false)
     {
+#pragma warning(push)
+#pragma warning(disable : 4996) // FIXME - deprecated function
         m_GuardedMutex = static_cast<PKGUARDED_MUTEX>(
             ExAllocatePoolWithTag(NonPagedPoolNx,
                                   sizeof(*m_GuardedMutex),
                                   t_PoolTag));
+#pragma warning(pop)
         if (!m_GuardedMutex)
         {
             throw std::bad_alloc();

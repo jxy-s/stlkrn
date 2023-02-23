@@ -92,9 +92,12 @@ void __cdecl __std_exception_copy(
 
     size_t len = strlen(From->_What) + 1;
 
+#pragma warning(push)
+#pragma warning(disable : 4996) // FIXME - deprecated function
     char* buff = static_cast<char*>(ExAllocatePoolWithTag(k_ExcCopyPoolType,
                                                           len,
                                                           k_ExcCopyPoolTag));
+#pragma warning(pop)
     if (!buff)
     {
         //

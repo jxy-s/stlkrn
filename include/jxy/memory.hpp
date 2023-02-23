@@ -60,10 +60,10 @@ public:
     {
     }
 
-    _CONSTEXPR20_DYNALLOC ~allocator() = default;
-    _CONSTEXPR20_DYNALLOC allocator& operator=(const allocator&) = default;
+    _CONSTEXPR20 ~allocator() = default;
+    _CONSTEXPR20 allocator& operator=(const allocator&) = default;
 
-    _CONSTEXPR20_DYNALLOC
+    _CONSTEXPR20
     void deallocate(
         value_type* const Memory,
         const size_type)
@@ -74,14 +74,17 @@ public:
         }
     }
 
-    _NODISCARD _CONSTEXPR20_DYNALLOC
+    _NODISCARD _CONSTEXPR20
     __declspec(allocator)
     value_type* allocate(_CRT_GUARDOVERFLOW const size_type Count)
     {
+#pragma warning(push)
+#pragma warning(disable : 4996) // FIXME - deprecated function
         auto memory = static_cast<value_type*>(
             ExAllocatePoolWithTag(t_PoolType,
                                   (sizeof(value_type) * Count),
                                   t_PoolTag));
+#pragma warning(pop)
         if (!memory)
         {
             throw std::bad_alloc();
