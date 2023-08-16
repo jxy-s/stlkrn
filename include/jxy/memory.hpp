@@ -144,7 +144,7 @@ public:
     _CXX17_DEPRECATE_OLD_ALLOCATOR_MEMBERS 
     void construct(U* const Memory, TArgs&&... Args) 
     {
-        ::new (std::_Voidify_iter(Memory)) U(std::forward<TArgs>(Args)...);
+        ::new (const_cast<void*>(static_cast<const volatile void*>(Memory))) U(std::forward<TArgs>(Args)...);
     }
 
     template <class U>
