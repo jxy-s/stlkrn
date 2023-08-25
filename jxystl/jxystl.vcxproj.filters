@@ -22,5 +22,6 @@
     <ClInclude Include="..\include\jxy\queue.hpp" />
     <ClInclude Include="..\include\jxy\unordered_map.hpp" />
     <ClInclude Include="..\include\jxy\unordered_set.hpp" />
+    <ClInclude Include="..\include\jxy\xhash" />
   </ItemGroup>
 </Project>

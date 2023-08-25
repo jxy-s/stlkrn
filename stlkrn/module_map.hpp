@@ -28,7 +28,7 @@ public:
     using ModuleContextType = jxy::shared_ptr<ModuleContext, 
                                               PoolTypes::ModuleContext,
                                               PoolTags::ModuleContext>;
-    using MapType = jxy::map<ModuleExtents, 
+    using MapType = jxy::map<ModuleExtents,
                              ModuleContextType,
                              PagedPool,
                              PoolTags::ModuleMap>;

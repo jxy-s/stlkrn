@@ -13,7 +13,7 @@
 //
 #pragma once
 #include <fltKernel.h>
-#include <jxy/map.hpp>
+#include <jxy/unordered_map.hpp>
 #include <jxy/vector.hpp>
 #include <jxy/locks.hpp>
 #include "pool_tags.hpp"
@@ -32,14 +32,15 @@ public:
     using ProcessContextType = jxy::shared_ptr<ProcessContext, 
                                                PoolTypes::ProcessContext,
                                                PoolTags::ProcessContext>;
-    using MapType = jxy::map<ProcessIdType, 
-                             ProcessContextType, 
-                             PagedPool, 
-                             PoolTags::ProcessMap>;
+    static constexpr uint64_t MapMaxLoadFactor = 11;
+    using MapType = jxy::unordered_map<ProcessIdType, 
+                                       ProcessContextType, 
+                                       PagedPool, 
+                                       PoolTags::ProcessMap>;
 
     ~ProcessMap() noexcept = default;
 
-    ProcessMap() = default;
+    ProcessMap();
 
     NTSTATUS Populate();
 
